@@ -140,6 +140,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.selectedObject = res.object;
       this.selectedObject.traverse((child: any) => {
         if (child instanceof THREE.Mesh) {
+          
           if(!this.priorcolor){
           this.priorcolor=child.material.color.clone();
 }
@@ -150,7 +151,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
           
-          if (!this.animationStarted) {
+          if (!this.animationStarted && child.name=="Cube001") {
             //this.mixer.timeScale = 1; // Set the animation time scale (e.g., speed)
             const animations = this.glob_object.animations;
 
