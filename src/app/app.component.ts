@@ -23,6 +23,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   private priorcolor: any;
   private clock!: THREE.Clock;
   private mixer!: THREE.AnimationMixer | null;
+  private animationStarted: boolean = false;
+  private glob_object:any;
   ngOnInit(): void {
     // Create your Three.js scene and objects here
     this.scene = new THREE.Scene();
@@ -58,18 +60,18 @@ export class AppComponent implements OnInit, AfterViewInit {
         const gltfLoader = new GLTFLoader();
         gltfLoader.load('assets/models/cubes.glb', (gltf) => {
           const object = gltf.scene;
-  
+          this.glob_object=gltf;
           this.scene.add(object);
-          const animations = gltf.animations;
-          if (animations && animations.length > 0) {
-            // Play or manipulate the animations as desired
-            this.mixer = new THREE.AnimationMixer(object);
-
-            const animationAction = this.mixer.clipAction(animations[0]);
-            animationAction.play();
-    
-          
-          }
+          //const animations = gltf.animations;
+          //if (animations && animations.length > 0) {
+          //  // Play or manipulate the animations as desired
+          //  this.mixer = new THREE.AnimationMixer(object);
+//
+          //  const animationAction = this.mixer.clipAction(animations[0]);
+          //  animationAction.play();
+    //
+          //
+          //}
         });
   }
 
@@ -140,11 +142,36 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (child instanceof THREE.Mesh) {
           if(!this.priorcolor){
           this.priorcolor=child.material.color.clone();
-          }
+}
           // Change the color of the intersected object
           child.material.color.set(0xff0000);
           //child.scale.set(1.2, 1.2, 1.2); // Set the color to red
           //child.scale.multiplyScalar(1.2);
+
+
+          
+          if (!this.animationStarted) {
+            //this.mixer.timeScale = 1; // Set the animation time scale (e.g., speed)
+            const animations = this.glob_object.animations;
+
+            if (animations && animations.length > 0) {
+            //  // Play or manipulate the animations as desired
+             this.mixer = new THREE.AnimationMixer(this.glob_object.scene);
+  
+             const animationAction = this.mixer.clipAction(animations[0]);
+            animationAction.setLoop(THREE.LoopOnce, 1);
+
+                // Add event listener for the "finished" event
+        this.mixer.addEventListener('finished', () => {
+      // Perform actions at the end of the animation
+      console.log('Animation finished');
+          this.animationStarted=false;
+      // Trigger your desired function or code here
+    });
+            animationAction.play();
+            this.animationStarted = true;
+          }
+          }
         }
       });
 
