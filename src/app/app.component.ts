@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Raycaster, Vector2 } from 'three';
+import { Clock } from 'three';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -20,9 +21,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   private mouse!: THREE.Vector2;
   private selectedObject: THREE.Object3D | null = null;;
   private priorcolor: any;
+  private clock!: THREE.Clock;
+  private mixer!: THREE.AnimationMixer | null;
   ngOnInit(): void {
     // Create your Three.js scene and objects here
     this.scene = new THREE.Scene();
+    this.mixer = null;
+    this.clock= new Clock();
     this.scene.background = null;
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
@@ -55,6 +60,16 @@ export class AppComponent implements OnInit, AfterViewInit {
           const object = gltf.scene;
   
           this.scene.add(object);
+          const animations = gltf.animations;
+          if (animations && animations.length > 0) {
+            // Play or manipulate the animations as desired
+            this.mixer = new THREE.AnimationMixer(object);
+
+            const animationAction = this.mixer.clipAction(animations[0]);
+            animationAction.play();
+    
+          
+          }
         });
   }
 
@@ -125,7 +140,6 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (child instanceof THREE.Mesh) {
           if(!this.priorcolor){
           this.priorcolor=child.material.color.clone();
-          console.log(this.priorcolor);
           }
           // Change the color of the intersected object
           child.material.color.set(0xff0000);
@@ -139,11 +153,16 @@ export class AppComponent implements OnInit, AfterViewInit {
     // For example, change the color of the intersected object
   }
   // Render the scene
-  this.renderer.render(this.scene, this.camera);
 
   // Request the next frame
+  const delta = this.clock.getDelta();
+  if (this.mixer) {
+    this.mixer.update(delta);
+  }
+  this.renderer.render(this.scene, this.camera);
+  this.controls.update();
   requestAnimationFrame(() => this.render());
-    this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+
+    
   }
 }
