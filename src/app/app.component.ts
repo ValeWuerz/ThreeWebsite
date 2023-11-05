@@ -151,7 +151,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
           
-          if (!this.animationStarted && child.name=="Cube001") {
+          if (!this.animationStarted && (child.name=="Cube001"|| child.name=="Cube004")) {
             //this.mixer.timeScale = 1; // Set the animation time scale (e.g., speed)
             const animations = this.glob_object.animations;
 
